@@ -84,10 +84,10 @@
             (a (node-left  nd))
             (b (node-right nd)))
         (cond
-          ((< v y) (mk-node y (insert-new v a) b))
-          ((> v y) (mk-node y a (insert-new v b)))
-          (else (raise "insert-helper::equal"))))))
+          ((< v y) (mk-node y (insert-helper v a) b))
+          ((> v y) (mk-node y a (insert-helper v b)))
+          (else (raise 'equal))))))
 
-  (with-handlers ([string? (lambda (e) node)])
+  (with-handlers ([symbol? (lambda (e) node)])
     (insert-helper x node)))
 
