@@ -58,7 +58,7 @@
 ; where d is the depth of the tree
 
 (define (is-member-new x node)
-  
+
   ; Here z is the last value for which (< x y) returned false, i.e. it is the
   ; last value for which (= x y) might have been true.
   (define (is-member-helper n z)
@@ -70,3 +70,24 @@
           (is-member-helper (node-right n) y)))))
 
   (is-member-helper node null))
+
+; Exercise 2.3 -- inserting an existing element into a tree copies the entire
+; search path. Rewrite insert using exceptions to avoid this copying. Establish
+; only one handler per insertion rather than one handler per iteration.
+
+(define (insert-new x node)
+
+  (define (insert-helper v nd)
+    (if (is-empty nd)
+      (mk-node v empty empty)
+      (let ((y (node-val   nd))
+            (a (node-left  nd))
+            (b (node-right nd)))
+        (cond
+          ((< v y) (mk-node y (insert-new v a) b))
+          ((> v y) (mk-node y a (insert-new v b)))
+          (else (raise "insert-helper::equal"))))))
+
+  (with-handlers ([string? (lambda (e) node)])
+    (insert-helper x node)))
+
