@@ -47,9 +47,10 @@
     (let ((y (node-val node))
           (a (node-left node))
           (b (node-right node)))
-      (if (< x y)
-        (mk-node y (insert x a) b)
-        (mk-node y a (insert x b))))))
+      (cond
+        ((< x y) (mk-node y (insert x a) b))
+        ((> x y) (mk-node y a (insert x b)))
+        (else node)))))
 
 (define (from-list xs)
   (foldl insert empty xs))
@@ -77,17 +78,41 @@
 
 (define (insert-new x node)
 
-  (define (insert-helper v nd)
+  (define (insert-helper nd)
     (if (is-empty nd)
-      (mk-node v empty empty)
+      (mk-node x empty empty)
       (let ((y (node-val   nd))
             (a (node-left  nd))
             (b (node-right nd)))
         (cond
-          ((< v y) (mk-node y (insert-helper v a) b))
-          ((> v y) (mk-node y a (insert-helper v b)))
+          ((< x y) (mk-node y (insert-helper a) b))
+          ((> x y) (mk-node y a (insert-helper b)))
           (else (raise 'equal))))))
 
   (with-handlers ([symbol? (lambda (e) node)])
-    (insert-helper x node)))
+    (insert-helper node)))
+
+; Exercise 2.4 -- combine the results of the last two exercises to come up with
+; an insert function that doesn't copy unnecessary values, and only performs d+1
+; comparisons.
+
+(define (insert-newer x node)
+
+  ; Here z is the last value for which (< x y) returned false, i.e. it is the
+  ; last value for which (= x y) might have been true.
+  (define (insert-helper z nd)
+    (if (is-empty nd)
+      (if (= x z)
+        (raise 'equal)
+        (mk-node x empty empty))
+      (let ((y (node-val   nd))
+            (a (node-left  nd))
+            (b (node-right nd)))
+        (if (< x y)
+          (mk-node y (insert-helper z a) b)
+          (mk-node y a (insert-helper y b))))))
+
+  (with-handlers ([symbol? (lambda (e) node)])
+    (insert-helper +nan.0 node)))
+
 
